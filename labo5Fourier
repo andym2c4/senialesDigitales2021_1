@@ -1,0 +1,128 @@
+%% LABORATORIO N°5 TRANSFORMADA DE FOURIER
+%Calculamos los espectros de potencia de una curva sinusoidal compuesta por las 
+%frecuencias 10 y 20 Hz, y de la misma señal corrompida con ruido.
+%% CREAR SEÑAL CON RUIDO
+%Crear la señal original y la señal con ruido
+clc,clear all, close all;
+T=2; % periodo de muestreo
+fs=128; % frecuencia de muestreo
+t=[0:1/fs:T]; % puntos de muestreo
+N=length(t);
+f=sin(10*2*pi*t)+sin(20*2*pi*t); % señal original
+g=f+randn(size(f)); % señal con ruído
+F=fft(f)/sqrt(N); % trasformada de Fourier de f
+G=fft(g)/sqrt(N); % trasformada de Fourier de g
+% Para dibujarlo, despreciamos la mitad del dominio debido a la simetría
+omega=0.5*fs*linspace(0,1,floor(N/2)+1); % vector de frecuencias discretas
+range=(1:floor(N/2)+1); % rango del espectro de potencia
+P=F(range).*conj(F(range)); % espectro de potencia de la señal f
+Q=G(range).*conj(G(range)); % espectro de potencia de la señal g
+figure
+subplot(2,1,1);
+plot(omega,P), xlabel('frequency'), ylabel('P'),title('Espectro de potencia de la señal f')
+subplot(2,1,2);
+plot(omega,Q), xlabel('frequency'), ylabel('Q'),title('Espectro de potencia de la señal g')
+
+%% METODO THRESHOLDING PARA SEÑALES CON RUIDO
+%metodo del valor umbral (thresholding)para quitar el ruido a una señal 
+Q2=G.*conj(G); % Calculamos el espectro de potencia para todo el rango de valores
+GT=G.*(Q2>10); % Hacemos cero los coeficientes con valores del espectro de potencia
+% por debajo de 10 (los escojemos a partir de la
+% figura del espectro de potencia)
+gT=ifft(GT)*sqrt(N ); % Aplicamos la transformada inversa de Fourier
+figure
+subplot(2,2,1);
+plot(t,f), xlabel('tiempo'), title('señal original')
+subplot(2,2,2);
+plot(t,g,'r'), xlabel('tiempo'), title('señal con ruido')
+subplot(2,2,[3,4])
+plot(t,gT), xlabel('tiempo') , title('señal a la que se ha quitado el ruido')
+%% EJERCICIO 1: SEÑAL Y GENERAR RUIDO
+%nueva señal generada
+T=2; %periodo de muestreo
+fs=1313;%frecuencia de muestreo
+t=[0:1/fs:T]; %puntos de muestreo
+N=length(t);
+f=sin(13*2*pi*t)+cos(26*2*pi*t);%señal original
+g=f+rand(size(f));%señal con ruido
+F=fft(f)/sqrt(N); % trasformada de Fourier de f
+G=fft(g)/sqrt(N); % trasformada de Fourier de g
+% Para dibujarlo, despreciamos la mitad del dominio debido a la simetría
+omega=0.5*fs*linspace(0,1,floor(N/2)+1); % vector de frecuencias discretas
+range=(1:floor(N/2)+1); % rango del espectro de potencia
+P=F(range).*conj(F(range)); % espectro de potencia de la señal f
+Q=G(range).*conj(G(range)); % espectro de potencia de la señal g
+figure
+subplot(2,1,1);
+plot(omega,P), xlabel('frequency'), ylabel('P'),title('Espectro de potencia de la señal f2')
+subplot(2,1,2);
+plot(omega,Q), xlabel('frequency'), ylabel('Q'),title('Espectro de potencia de la señal g2')
+
+%% EJERCICIO 1: METODO THRESHOLDING
+%metodo del valor umbral (thresholding)para quitar el ruido a una señal 
+Q2=G.*conj(G); % Calculamos el espectro de potencia para todo el rango de valores
+GT=G.*(Q2>10); % Hacemos cero los coeficientes con valores del espectro de potencia
+% por debajo de 10 (los escojemos a partir de la
+% figura del espectro de potencia)
+gT=ifft(GT)*sqrt(N ); % Aplicamos la transformada inversa de Fourier
+figure
+subplot(2,2,1);
+plot(t,f), xlabel('tiempo'), title('señal original 2')
+subplot(2,2,2);
+plot(t,g,'r'), xlabel('tiempo'), title('señal con ruido 2')
+subplot(2,2,[3,4])
+plot(t,gT), xlabel('tiempo') , title('señal a la que se ha quitado el ruido 2')
+%% CARGANDO SEÑAL DE AUDIO CON RUIDO
+%cargando una señal de audio con ruido
+[y,Fs,NBits]=wavread('susticonFe16bitsRuido.wav');
+%Donde:
+%y: señal
+%Fs: frecuencia de sampleo
+%Nbits: numero de bits por sampling
+y=y(:,1);%dado que el audio no es mono
+T=2;%periodo de muestreo
+t=linspace(0,T,length(y)); %puntos de muestreo
+N=length(t);
+F=fft(y)/N;
+omega=0.5*Fs*linspace(0,1,floor(N/2)+1); % vector de frecuencias discretas
+range=(1:floor(N/2)+1); % rango del espectro de potencia
+P=F(range).*conj(F(range)); % espectro de potencia de la señal f
+figure,plot(omega,P), xlabel('frequency'), ylabel('P'),title('Espectro de potencia de la señal de audio')
+%% M. THRESHOLDING PARA SEÑAL DE AUDIO
+%metodo del valor umbral para la señal de audio
+P2=F.*conj(F); % Calculamos el espectro de potencia para todo el rango de valores
+FT=F.*(P2>2e-7); % Hacemos cero los coeficientes con valores del espectro de potencia
+% por debajo de 10 (los escojemos a partir de la
+% figura del espectro de potencia)
+gT=ifft(FT)*sqrt(N); % Aplicamos la transformada inversa de Fourier
+figure,plot(t,y), xlabel('tiempo'), title('señal original de audio')
+figure,plot(t,gT), xlabel('tiempo') , title('señal a la que se ha quitado el ruido del audio')
+%% REPRODUCIR LA SEÑAL CONDICIONADA
+%comparando los audios
+%audio original
+%sound(y,Fs)
+%para guardar el nuevo audio:
+%wavwrite(gT,Fs,'susticonFeSinRuido.wav')
+%escuchar el audio sin ruido
+volumen=1000;
+sound(gT*volumen,Fs)
+%% EJERCICIO 2
+%Serie temporal
+n=2^14; %Número de pares de datos
+fs=2.5; % frecuencia de muestreo
+dt=0.4; %Intervalo de Tiempo
+t=(0:n-1)*dt; %Vector de Tiempo
+f=10*sin(2*pi*29*t)+  ...
+   3*sin(2*5*t)+ ...
+   2.5*sin(rand*25*2*pi*t)+...
+   3.5*cos(rand*155*2*pi*t)+...
+   2.5*sin(300*pi*t); % señal original
+%Transformada rápida de Fourier
+g=fft(f);
+%Array de frecuencias
+dw=2*pi/(n*dt);
+w=(0:n-1)*dw;
+power=abs(g).^2;
+plot(w,power)
+xlabel('Frecuencia Angular (w)');
+ylabel('Potencia')
