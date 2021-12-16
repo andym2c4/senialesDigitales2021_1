@@ -19,7 +19,7 @@ figure,plot(t,y), xlabel('tiempo'), title('señal original de audio')
 figure,plot(omega,P), xlabel('frequency'), ylabel('P'),title('Espectro de potencia de la señal de audio')
 %%
 %       Reproducir audio
-sound(y,Fs)
+%sound(y,Fs)
 %%
 % En el analisis en la grafica del espectr de potencia
 % se requiere pasar las frecuencias menores a 250 a 740
@@ -70,3 +70,6 @@ figure
 plot(y)
 figure
 plot(y4)
+%%
+audiowrite('senialFiltrada.wav',y4,Fs);
+sound(y4,Fs)
